@@ -24,6 +24,7 @@ class ExtractorErrorsTest {
     @Test
     fun classifyRecognisesAMissingConnection() {
         assertEquals(VideoError.OFFLINE, ExtractorErrors.classify("ERROR: Unable to download webpage: <urlopen error [Errno 7] No address associated with hostname>"))
+        assertEquals(VideoError.OFFLINE, ExtractorErrors.classify("ERROR: [Errno -2] Name or service not known"))
     }
 
     @Test

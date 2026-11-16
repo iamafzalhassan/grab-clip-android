@@ -126,7 +126,7 @@ class GrabViewModel(private val settings: SettingsPreferences, private val repos
     private fun fetch(link: VideoLink) {
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
-            repository.discard()
+            repository.release()
             local.update { current -> GrabLocalState(isFetching = true, feedback = current.feedback, link = link) }
             try {
                 val details = repository.fetchDetails(link)

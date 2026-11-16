@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <cache-path
-        name="downloads"
-        path="downloads/" />
     <external-files-path
-        name="kept"
-        path="." />
+        name="downloads"
+        path="Download/" />
 </paths>

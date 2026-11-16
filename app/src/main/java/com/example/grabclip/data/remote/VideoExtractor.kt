@@ -21,6 +21,9 @@ import kotlinx.coroutines.sync.withLock
 import java.io.File
 import java.io.IOException
 
+private const val CONCURRENT_FRAGMENTS: Int = 4
+private const val SOCKET_TIMEOUT_SECONDS: Int = 20
+
 private const val ENGINE_REFRESH_MILLIS: Long = 86_400_000L
 
 private const val AUDIO_FORMAT: String = "m4a"
@@ -42,6 +45,7 @@ class VideoExtractor(private val now: () -> Long, private val context: Context, 
             val progress = DownloadProgress()
             val request = singleVideoRequest(url)
                 .addOption("--no-mtime")
+                .addOption("--concurrent-fragments", CONCURRENT_FRAGMENTS)
                 .addOption("-f", FormatSelector.forQuality(quality))
                 .addOption("-o", File(directory, OUTPUT_TEMPLATE).absolutePath)
             if (quality.isAudioOnly) {
@@ -117,7 +121,7 @@ class VideoExtractor(private val now: () -> Long, private val context: Context, 
         throw ExtractionException(VideoError.FAILED)
     }
 
-    private fun singleVideoRequest(url: String): YoutubeDLRequest = YoutubeDLRequest(url).addOption("--no-playlist").addOption("--playlist-items", "1")
+    private fun singleVideoRequest(url: String): YoutubeDLRequest = YoutubeDLRequest(url).addOption("--no-playlist").addOption("--playlist-items", "1").addOption("--socket-timeout", SOCKET_TIMEOUT_SECONDS)
 
     private fun toStream(format: VideoFormat): VideoStream = VideoStream(
         height = format.height,

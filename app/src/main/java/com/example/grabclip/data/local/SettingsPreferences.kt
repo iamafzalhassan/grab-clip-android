@@ -10,11 +10,18 @@ import kotlinx.coroutines.flow.callbackFlow
 
 private const val KEY_DELETE_AFTER_SHARING: String = "delete_after_sharing"
 private const val KEY_ENGINE_UPDATED_AT: String = "engine_updated_at"
+private const val KEY_PENDING_DELETE_PATH: String = "pending_delete_path"
+private const val KEY_PENDING_DELETE_URI: String = "pending_delete_uri"
 private const val KEY_PREFERRED_QUALITY: String = "preferred_quality"
 private const val PREFERENCES_NAME: String = "settings"
 
 class SettingsPreferences(context: Context) {
     private val preferences: SharedPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+
+    fun clearPendingDelete() = preferences.edit {
+        remove(KEY_PENDING_DELETE_PATH)
+        remove(KEY_PENDING_DELETE_URI)
+    }
 
     fun engineUpdatedAt(): Long = preferences.getLong(KEY_ENGINE_UPDATED_AT, 0L)
 
@@ -26,9 +33,18 @@ class SettingsPreferences(context: Context) {
 
     fun preferredQuality(): Int = preferences.getInt(KEY_PREFERRED_QUALITY, QualityPreference.DEFAULT).takeIf { preference -> preference in QualityPreference.options } ?: QualityPreference.DEFAULT
 
+    fun pendingDeletePath(): String = preferences.getString(KEY_PENDING_DELETE_PATH, null).orEmpty()
+
+    fun pendingDeleteUri(): String = preferences.getString(KEY_PENDING_DELETE_URI, null).orEmpty()
+
     fun setDeleteAfterSharing(isEnabled: Boolean) = preferences.edit { putBoolean(KEY_DELETE_AFTER_SHARING, isEnabled) }
 
     fun setEngineUpdatedAt(millis: Long) = preferences.edit { putLong(KEY_ENGINE_UPDATED_AT, millis) }
+
+    fun setPendingDelete(path: String, uri: String) = preferences.edit {
+        putString(KEY_PENDING_DELETE_PATH, path)
+        putString(KEY_PENDING_DELETE_URI, uri)
+    }
 
     fun setPreferredQuality(preference: Int) = preferences.edit { putInt(KEY_PREFERRED_QUALITY, preference) }
 

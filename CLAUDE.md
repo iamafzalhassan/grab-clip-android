@@ -79,10 +79,11 @@ member ordering convention below from its first line.
 - **All user-facing text is a string resource** in `res/values/strings.xml`,
   read with `stringResource` in composition and with `LocalResources` inside a
   coroutine (snackbar messages). No string literal reaches the screen.
-- **A downloaded file is never left behind by accident.** Every file GrabClip
-  writes has exactly one owner (`VideoFiles`) and one recorded reason to still
-  exist. Anything else in the download folder is stale and is removed on the
-  next launch.
+- **A file is never deleted, or left behind, by accident.** Every file GrabClip
+  writes has exactly one owner (`VideoFiles`). Work in progress in the cache is
+  always cleaned up. A finished video in Downloads is deleted only by the
+  Delete button or after it was shared with Delete After Sharing on, never as
+  a side effect of anything else.
 
 ## Architecture
 
@@ -199,30 +200,32 @@ reason.
   `GlowStrip` are Compose `Brush` gradients whose stops fade to transparent, so
   the "no images, ever" rule holds and nothing depends on `Modifier.blur`, which
   only works on API 31 and later.
-- **Delete after sharing is a setting, on by default.** With it on, the file
-  lives in `cacheDir/downloads` and is shared through `FileProvider`. The share
-  sheet reports the chosen app to `ShareResultReceiver`, which only raises a
-  flag; the file is deleted the next time the screen starts (`ON_START`), which
-  is the developer coming back from the other app. Android reports which app
-  was chosen but never when that app has finished reading the file, so deleting
-  at the moment of sharing would break the share. If the share sheet is
-  dismissed without a choice, nothing is deleted, and the Delete button is
-  always there.
-- **With the setting off, the video is saved to the gallery the moment the
-  download finishes**, not after sharing: `Movies/GrabClip` for video,
-  `Music/GrabClip` for audio, and it is then shared from there. Saving at
-  completion rather than on return means a kept video can never be lost to the
-  app being closed mid-share. The setting is read when the download finishes,
-  so changing it does not move a video that is already on screen. The Delete
-  button becomes Done, which clears the screen and leaves the file.
-- **Anything in `cacheDir/downloads` at launch is stale and is deleted**
-  (`VideoRepository.prepare`). The download state lives in memory only, so a
-  file found there at start belongs to no one. This is what makes "delete after
-  sharing" hold even when the app was closed before the developer came back.
-- **No storage permission.** `MediaStore` writes to the gallery on API 29 and
-  later with no permission, as `Debitter` does for Downloads. On API 26–28 a
-  kept video goes to the app's own external `Movies` or `Music` folder instead
-  and is shared through `FileProvider`.
+- **Every download lands in the phone's Downloads folder**, in
+  `Download/GrabClip`, at the developer's request, whatever the Delete After
+  Sharing setting says. yt-dlp works in `cacheDir/downloads`, and the finished
+  file is then copied into Downloads through `MediaStore.Downloads` and shared
+  from there, so no storage permission is needed. On API 26–28, where that
+  collection does not exist, the file goes to the app's own external `Download`
+  folder and is shared through `FileProvider`.
+- **Delete after sharing is a setting, on by default.** The share sheet reports
+  the chosen app to `ShareResultReceiver`; the video is removed from Downloads
+  the next time the screen starts (`ON_START`), which is the developer coming
+  back from the other app. Android reports which app was chosen but never when
+  that app has finished reading the file, so deleting at the moment of sharing
+  would break the share. If the share sheet is dismissed without a choice,
+  nothing is deleted, and the Delete button is always there. With the setting
+  off, nothing is ever deleted and the Delete button becomes Done, which only
+  clears the screen. The setting is read when the download finishes, so
+  changing it does not affect a video that is already on screen.
+- **Only a video that was shared is ever deleted automatically.** Choosing a
+  share target records the file in `SettingsPreferences` as pending deletion.
+  If the app is closed before the developer comes back, `VideoRepository.prepare`
+  deletes that file at the next launch and clears the record. A video that was
+  downloaded but never shared is the developer's file in a folder they can
+  see: it stays in Downloads until they press Delete, even when a new link
+  replaces it on screen.
+- **`cacheDir/downloads` holds work in progress only** and is emptied at launch,
+  before each download and after a failure or a cancel.
 - **The clipboard is read when the window gains focus, and only when it has
   changed.** Android 10 and later refuse the clipboard to an app without focus,
   so `onResume` is too early; `LocalWindowInfo.isWindowFocused` is the signal.
@@ -231,9 +234,17 @@ reason.
   toast, and reads only a clip it has not seen. Paste Link always reads. A link
   that was just handled is therefore never fetched twice, and deleting a video
   does not make the app fetch the same link again.
-- **A new link on the clipboard replaces the video on screen**, deleting it if
-  it was not kept, except while a download is running, when the clipboard is
-  ignored.
+- **A new link on the clipboard replaces the video on screen** without deleting
+  it (`VideoRepository.release`), except while a download is running, when the
+  clipboard is ignored.
+- **Drawing work that repeats every frame is cached.** `IridescentGlow` builds
+  its five radial brushes and its fade once per size in `drawWithCache` and only
+  moves them while drifting; `ProgressRing` remembers its sweep brush; and
+  `VideoRepository` drops progress steps under half a percent, so a download
+  redraws the screen about two hundred times instead of once per line of
+  yt-dlp output.
+- **Network calls give up.** Every yt-dlp request carries a 20 second socket
+  timeout, and fragmented downloads fetch four fragments at a time.
 - **Downloads run in a foreground service** (`DownloadService`, type
   `dataSync`). Android freezes an app's processes soon after it leaves the
   screen, and yt-dlp is a child process, so without the service a download
@@ -276,30 +287,37 @@ reason.
 - **Release builds are signed with the debug key and shrunk with R8**, as in
   `QuietFeed`: the app is sideloaded and never published, so no release keystore
   is kept.
-- **Launcher icon and splash share one vector mark**
-  (`drawable/ic_launcher_foreground`): a letter G for GrabClip, drawn as a
-  single round-capped stroke, 11 wide — a ring of radius 19 on the 108 canvas, open at
-  the upper right, with a bar running in from the right to the centre — and
-  stroked with a diagonal linear gradient in the five `iridescent` hues, top left
-  to bottom right, on `brand_paper`. The gradient runs from 36.68 to 71.32 on
-  both axes, which is exactly where the diagonal enters and leaves the stroked
-  ring, and its stops sit at 0.1, 0.3, 0.5, 0.7 and 0.9 with the end colours
-  held to the edges, so each of the five colours gets an equal band; fitted to
-  the whole canvas, the first and last colours fell outside the letter. If the
-  ring's radius or stroke changes, recompute both ends. It is linear on purpose: a sweep gradient
-  pinches every colour to a point at the centre, exactly where the G's bar
-  ends, and showed as a hard pinwheel there. This was
-  the developer's choice over a black ground. The pastel stops themselves
-  disappear on paper, so the icon alone uses deeper versions of the same hues
-  (butter `#F2C230`, rose `#EE7FA3`, lilac `#A98BE6`, sky `#6FB2EE`, mint
-  `#7FCF8A`); they are not `AppColors` tokens and are used nowhere else.
-  The developer's reference was Google's G; the mark is GrabClip's own drawing
-  with its own geometry, deliberately not a recolour of that logo. It is an
-  adaptive icon with the same drawable as its monochrome layer, and the
-  template's raster mipmaps were removed because `minSdk` 26 always uses the
-  adaptive icon. The splash is `core-splashscreen` (`Theme.GrabClip.Launch`) on
-  `brand_paper`, then `Theme.GrabClip` with the same paper window background,
-  so the splash hands over to the app without a colour change.
+- **The brand is the developer's mark**: a ring split by a horizontal gap, its
+  upper arc a cap, its lower left an arrow pointing up and right, its lower
+  right a hook, in a soft gradient that runs from orange and yellow at the top
+  left, through mint to cyan at the top right, coral and magenta at the lower
+  left, and fades almost to white at the lower right. The developer supplied it
+  as an image; it was traced into three vector paths so the "no images, ever"
+  rule holds. The earlier drawn G and the "GrabClip" wordmark were replaced by
+  it at the developer's request.
+- **The mark is generated, not hand-edited.** `tools/mark.js` holds the traced
+  geometry, in a 1932 unit square with the ring's centre at 966, outer radius
+  966 and inner radius 695, and the gradients, and writes both drawables
+  (arguments: the launcher XML, the splash XML and an optional preview HTML).
+  It has no dependencies and is not part of the Gradle build. To change the
+  mark's shape, colour or size, edit the script and regenerate; do not nudge
+  numbers in the XML.
+- **The gradient is approximated with linear gradients**, because a vector
+  drawable has no mesh gradient: one per shape for the upper arc and the hook,
+  and two layered for the arrow, a vertical coral to magenta under a
+  horizontal fade to pale pink. The colours were picked by eye from the
+  supplied image. They are not `AppColors` tokens and are used only in these
+  two drawables.
+- **The launcher icon is the mark** (`drawable/ic_launcher_foreground`) on
+  `brand_paper`, scaled to 0.027 so the ring is 52 across on the 108 canvas,
+  centred, inside the 66 safe zone. It is an adaptive icon with the same
+  drawable as its monochrome layer, and the template's raster mipmaps were
+  removed because `minSdk` 26 always uses the adaptive icon.
+- **The splash shows the mark** (`drawable/ic_splash`) on `brand_paper`, then
+  `Theme.GrabClip` with the same paper window background, so the splash hands
+  over to the app without a colour change. The system masks a splash icon to a
+  circle two thirds of its size, so on the 1000 canvas the mark is scaled to
+  0.28, a ring 541 across, inside that 667 circle.
 - **No backup.** `allowBackup="false"`, as in `Debitter` and `QuietFeed`.
 - **Versions match `QuietFeed`** (AGP 9.1.1 with built-in Kotlin, Kotlin 2.2.10
   for the Compose plugin, Compose BOM 2026.08.00, `compileSdk` 37, `targetSdk`

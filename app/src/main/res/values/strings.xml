@@ -55,11 +55,11 @@
     <string name="feedback_download_cancelled">Download cancelled. Nothing was saved on this phone.</string>
     <string name="feedback_link_not_found">No video link on the clipboard. Copy a YouTube, Instagram or Facebook link first.</string>
     <string name="feedback_share_failed">No app could take the video. Install an app that accepts videos, then share again.</string>
-    <string name="feedback_video_deleted">Shared and deleted. The video is no longer on this phone.</string>
-    <string name="feedback_video_kept">Saved to the GrabClip folder in your gallery. It stays there after you share it.</string>
+    <string name="feedback_video_deleted">Shared and deleted. The video is no longer in Downloads.</string>
+    <string name="feedback_video_kept">Saved to Downloads, in the GrabClip folder. It stays there after you share it.</string>
 
-    <string name="settings_delete_message_off">Kept in your gallery after sharing</string>
-    <string name="settings_delete_message_on">Removed from the phone once shared</string>
+    <string name="settings_delete_message_off">Kept in Downloads after sharing</string>
+    <string name="settings_delete_message_on">Removed from Downloads once shared</string>
     <string name="settings_delete_title">Delete After Sharing</string>
     <string name="settings_downloader_title">Downloader</string>
     <string name="settings_downloader_version">Version %1$s</string>

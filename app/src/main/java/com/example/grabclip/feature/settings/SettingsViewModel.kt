@@ -26,6 +26,7 @@ class SettingsViewModel(private val settings: SettingsPreferences, private val e
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
+            SettingsEvent.Opened -> local.update { current -> if (current.isUpdating) current else current.copy(engineVersion = extractor.version(), updateResult = null) }
             is SettingsEvent.SetDeleteAfterSharing -> settings.setDeleteAfterSharing(event.isEnabled)
             is SettingsEvent.SetPreferredQuality -> settings.setPreferredQuality(event.preference)
             SettingsEvent.UpdateDownloader -> updateDownloader()

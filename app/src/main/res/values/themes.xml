@@ -6,7 +6,7 @@
 
     <style name="Theme.GrabClip.Launch" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/brand_paper</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
         <item name="postSplashScreenTheme">@style/Theme.GrabClip</item>
     </style>
 </resources>

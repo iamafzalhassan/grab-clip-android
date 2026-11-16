@@ -3,7 +3,7 @@ package com.example.grabclip.ui.components.display
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -12,8 +12,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.drawscope.translate
 import com.example.grabclip.ui.theme.AppColors
 import com.example.grabclip.ui.theme.AppSpacing
 import kotlin.math.cos
@@ -50,17 +52,25 @@ fun IridescentGlow(isDrifting: Boolean, modifier: Modifier = Modifier) {
         }
     }
 
-    Canvas(modifier = modifier.fillMaxWidth().height(AppSpacing.glowHeight).clipToBounds()) {
-        val drift = size.width * DRIFT_RATIO
-        val radians = Math.toRadians(turn.value.toDouble()).toFloat()
+    Spacer(
+        modifier = modifier.fillMaxWidth().height(AppSpacing.glowHeight).clipToBounds().drawWithCache {
+            val drift = size.width * DRIFT_RATIO
+            val fade = Brush.verticalGradient(colors = listOf(AppColors.surfaceBase.copy(alpha = 0f), AppColors.surfaceBase), endY = size.height, startY = size.height * FADE_START_RATIO)
+            val spotBrushes = glowSpots.mapIndexed { index, spot ->
+                val color = AppColors.iridescent[index]
+                Brush.radialGradient(center = Offset.Zero, colors = listOf(color.copy(alpha = GLOW_ALPHA), color.copy(alpha = 0f)), radius = size.width * spot.radius)
+            }
 
-        glowSpots.forEachIndexed { index, spot ->
-            val color = AppColors.iridescent[index]
-            val center = Offset(x = size.width * spot.centerX + drift * cos(radians + spot.phase), y = size.height * spot.centerY + drift * sin(radians + spot.phase))
-            val radius = size.width * spot.radius
+            onDrawBehind {
+                val radians = Math.toRadians(turn.value.toDouble()).toFloat()
 
-            drawCircle(brush = Brush.radialGradient(center = center, colors = listOf(color.copy(alpha = GLOW_ALPHA), color.copy(alpha = 0f)), radius = radius), center = center, radius = radius)
-        }
-        drawRect(brush = Brush.verticalGradient(colors = listOf(AppColors.surfaceBase.copy(alpha = 0f), AppColors.surfaceBase), endY = size.height, startY = size.height * FADE_START_RATIO))
-    }
+                glowSpots.forEachIndexed { index, spot ->
+                    translate(left = size.width * spot.centerX + drift * cos(radians + spot.phase), top = size.height * spot.centerY + drift * sin(radians + spot.phase)) {
+                        drawCircle(brush = spotBrushes[index], center = Offset.Zero, radius = size.width * spot.radius)
+                    }
+                }
+                drawRect(brush = fade)
+            }
+        },
+    )
 }

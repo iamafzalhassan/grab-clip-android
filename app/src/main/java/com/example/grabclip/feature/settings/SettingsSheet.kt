@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +33,10 @@ import com.example.grabclip.ui.theme.AppTextStyles
 @Composable
 fun SettingsSheet(onDismiss: () -> Unit, viewModel: SettingsViewModel, modifier: Modifier = Modifier) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(viewModel) {
+        viewModel.onEvent(SettingsEvent.Opened)
+    }
 
     AppModalSheet(modifier = modifier, onDismiss = onDismiss, title = stringResource(R.string.settings_title)) { sheet ->
         AppTray {

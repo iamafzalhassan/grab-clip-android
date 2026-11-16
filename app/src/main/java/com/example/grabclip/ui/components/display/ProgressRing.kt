@@ -37,7 +37,7 @@ private const val FILL_MILLIS: Int = 400
 @Composable
 fun ProgressRing(fraction: Float, caption: String, label: String, modifier: Modifier = Modifier) {
     val filled by animateFloatAsState(animationSpec = tween(durationMillis = FILL_MILLIS), label = "progressRing", targetValue = fraction.coerceIn(0f, 1f))
-    val stops = remember { AppColors.iridescent + AppColors.iridescent.first() }
+    val sweep = remember { Brush.sweepGradient(AppColors.iridescent + AppColors.iridescent.first()) }
 
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(modifier = Modifier.size(AppSpacing.progressRing).progressSemantics(filled), contentAlignment = Alignment.Center) {
@@ -49,7 +49,7 @@ fun ProgressRing(fraction: Float, caption: String, label: String, modifier: Modi
                 drawArc(color = AppColors.surfaceSunken, size = arcSize, startAngle = 0f, style = Stroke(width = stroke), sweepAngle = FULL_TURN, topLeft = topLeft, useCenter = false)
                 if (filled > 0f) {
                     rotate(degrees = TOP_ANGLE) {
-                        drawArc(brush = Brush.sweepGradient(stops), size = arcSize, startAngle = 0f, style = Stroke(cap = StrokeCap.Round, width = stroke), sweepAngle = FULL_TURN * filled, topLeft = topLeft, useCenter = false)
+                        drawArc(brush = sweep, size = arcSize, startAngle = 0f, style = Stroke(cap = StrokeCap.Round, width = stroke), sweepAngle = FULL_TURN * filled, topLeft = topLeft, useCenter = false)
                     }
                 }
             }
