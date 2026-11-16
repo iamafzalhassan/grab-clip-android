@@ -14,22 +14,22 @@
                 android:startY="48.44"
                 android:type="linear">
                 <item
-                    android:color="#FFFBB46F"
+                    android:color="#FFFB9129"
                     android:offset="0" />
                 <item
-                    android:color="#FFFCD75C"
+                    android:color="#FFFCC40C"
                     android:offset="0.18" />
                 <item
-                    android:color="#FFD8E28A"
+                    android:color="#FFD3E25E"
                     android:offset="0.38" />
                 <item
-                    android:color="#FFA6EBBE"
+                    android:color="#FF84EBA8"
                     android:offset="0.55" />
                 <item
-                    android:color="#FF6FFBE8"
+                    android:color="#FF29FBDF"
                     android:offset="0.78" />
                 <item
-                    android:color="#FF6CFDF6"
+                    android:color="#FF24FDF3"
                     android:offset="1" />
             </gradient>
         </aapt:attr>
@@ -43,13 +43,13 @@
                 android:startY="50.63"
                 android:type="linear">
                 <item
-                    android:color="#FFFCA684"
+                    android:color="#FFFC7B48"
                     android:offset="0" />
                 <item
-                    android:color="#FFFF8AA0"
+                    android:color="#FFFF5071"
                     android:offset="0.45" />
                 <item
-                    android:color="#FFFF5FCF"
+                    android:color="#FFFF0FB7"
                     android:offset="1" />
             </gradient>
         </aapt:attr>
@@ -63,13 +63,13 @@
                 android:startY="27.92"
                 android:type="linear">
                 <item
-                    android:color="#00F5D6E8"
+                    android:color="#00F5C7E2"
                     android:offset="0" />
                 <item
-                    android:color="#B3EBD2E2"
+                    android:color="#B3EBC5DE"
                     android:offset="0.6" />
                 <item
-                    android:color="#E6E0E4D9"
+                    android:color="#E6DEE4D3"
                     android:offset="1" />
             </gradient>
         </aapt:attr>
@@ -83,16 +83,16 @@
                 android:startY="50.63"
                 android:type="linear">
                 <item
-                    android:color="#FF94FFF7"
+                    android:color="#FF5EFFF3"
                     android:offset="0" />
                 <item
-                    android:color="#FFC8F8F6"
+                    android:color="#FFB0F8F5"
                     android:offset="0.45" />
                 <item
-                    android:color="#FFEEF0F6"
+                    android:color="#FFEAEDF6"
                     android:offset="0.75" />
                 <item
-                    android:color="#FFF6E4F0"
+                    android:color="#FFF6DBED"
                     android:offset="1" />
             </gradient>
         </aapt:attr>

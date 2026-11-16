@@ -38,38 +38,27 @@ class QualityCatalogTest {
     }
 
     @Test
-    fun buildOffersOnly720And480() {
-        val qualities = QualityCatalog.build(
-            listOf(
-                videoOnly(codec = "avc1.4d401e", height = 480, sizeBytes = 20L, width = 854),
-                videoOnly(codec = "avc1.640028", height = 1080, sizeBytes = 80L, width = 1920),
-                videoOnly(codec = "avc1.4d401f", height = 720, sizeBytes = 40L, width = 1280),
-                videoOnly(codec = "avc1.4d4015", height = 360, sizeBytes = 10L, width = 640),
-            ),
-        )
-
-        assertEquals(listOf(720, 480, 0), qualities.map(VideoQuality::resolution))
-    }
-
-    @Test
-    fun buildOffersTheLowestWhenEverythingIsAbove720() {
-        val qualities = QualityCatalog.build(listOf(videoOnly(codec = "avc1.640028", height = 1080, sizeBytes = 80L, width = 1920), videoOnly(codec = "avc1.640032", height = 1440, sizeBytes = 160L, width = 2560)))
-
-        assertEquals(listOf(1080, 0), qualities.map(VideoQuality::resolution))
-    }
-
-    @Test
-    fun buildOffersTheNearestLowerResolutionWhenOneIsMissing() {
-        val qualities = QualityCatalog.build(listOf(videoOnly(codec = "avc1.4d401e", height = 540, sizeBytes = 25L, width = 960), videoOnly(codec = "avc1.4d4015", height = 360, sizeBytes = 10L, width = 640)))
-
-        assertEquals(listOf(540, 360, 0), qualities.map(VideoQuality::resolution))
-    }
-
-    @Test
     fun buildNamesAVerticalVideoByItsShortSide() {
         val qualities = QualityCatalog.build(listOf(videoOnly(codec = "avc1.640028", height = 1920, sizeBytes = 30L, width = 1080)))
 
         assertEquals(VideoQuality(isAudioOnly = false, height = 1920, resolution = 1080, sizeBytes = 30L), qualities.first())
+    }
+
+    @Test
+    fun buildOffersEveryResolutionOnceHighestFirst() {
+        val qualities = QualityCatalog.build(
+            listOf(
+                videoOnly(codec = "avc1.4d401e", height = 480, sizeBytes = 20L, width = 854),
+                videoOnly(codec = "avc1.640028", height = 1080, sizeBytes = 80L, width = 1920),
+                videoOnly(codec = "vp09.00.40.08", height = 1080, sizeBytes = 120L, width = 1920),
+                videoOnly(codec = "avc1.640032", height = 1440, sizeBytes = 160L, width = 2560),
+                videoOnly(codec = "avc1.4d401f", height = 720, sizeBytes = 40L, width = 1280),
+                videoOnly(codec = "avc1.4d4015", height = 360, sizeBytes = 10L, width = 640),
+                videoOnly(codec = "avc1.4d401e", height = 540, sizeBytes = 25L, width = 960),
+            ),
+        )
+
+        assertEquals(listOf(1440, 1080, 720, 540, 480, 360, 0), qualities.map(VideoQuality::resolution))
     }
 
     @Test

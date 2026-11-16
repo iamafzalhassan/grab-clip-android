@@ -264,14 +264,12 @@ reason.
   100 twice, video then audio. `DownloadProgress` gives the first stream the
   first nine tenths and everything after it the last tenth, and never moves
   backwards. A single-stream download therefore ends at 90% and jumps to done.
-- **Only 720p, 480p and Audio only are offered**, at the developer's request:
-  the videos are for sharing, and a short list beats a full ladder. For each of
-  720 and 480 the catalog offers the highest resolution the video has at or
-  below it, so a video with 540 and 360 shows "540p" and "360p", and a video
-  that has both targets shows exactly "720p" and "480p". If everything is above
-  720, the lowest one is offered so there is always a video choice. The
-  Preferred Quality setting has the same three choices and defaults to 720; a
-  stored value from the older, longer list reads as 720.
+- **Every resolution the video has is offered**, highest first, then Audio
+  only, at the developer's request after trying a short list of 720p and 480p.
+  Streams of the same resolution are one choice. The Preferred Quality setting
+  offers 2160, 1440, 1080, 720, 480, 360 and Audio, defaults to 720, and picks
+  the highest resolution the video has at or below the preference, or the
+  lowest it has when everything is above.
 - **A quality is named by the video's short side**, so a vertical 1080 × 1920
   video is "1080p", while the format selector caps on the real height. When a
   site reports no resolution at all, the one choice is "Best available".
@@ -306,8 +304,10 @@ reason.
   drawable has no mesh gradient: one per shape for the upper arc and the hook,
   and two layered for the arrow, a vertical coral to magenta under a
   horizontal fade to pale pink. The colours were picked by eye from the
-  supplied image. They are not `AppColors` tokens and are used only in these
-  two drawables.
+  supplied image, then made one and a half times as saturated at the
+  developer's request, keeping each colour's hue and brightness. They are not `AppColors` tokens and are used only in these
+  two drawables. Filling the mark with the deeper brand hues instead was tried
+  and reverted at the developer's request.
 - **The launcher icon is the mark** (`drawable/ic_launcher_foreground`) on
   `brand_paper`, scaled to 0.027 so the ring is 52 across on the 108 canvas,
   centred, inside the 66 safe zone. It is an adaptive icon with the same
